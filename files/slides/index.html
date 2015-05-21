@@ -142,32 +142,33 @@ module Main (C: V1_LWT.CONSOLE) (S: V1_LWT.STACKV4) = struct
 end 
           </code>
           </pre>
+          <p><a href="https://github.com/mattgray/devsintheditch-unikernel-talk/tree/master/example_network">https://github.com/mattgray/devsintheditch-unikernel-talk/tree/master/example_network</a></p>
         </section>
         <section>
           <pre>
           <code>
 open Mirage
 
-let main = foreign "Unikernel.Main" (console @-> stackv4 @-> job)
+let main = foreign "Unikernel.Main" (console @-&gt; stackv4 @-&gt; job)
 
 let net =
   try match Sys.getenv "NET" with
-    | "direct" -> `Direct
-    | "socket" -> `Socket
-    | _        -> `Socket
-  with Not_found -> `Socket
+    | "direct" -&gt; `Direct
+    | "socket" -&gt; `Socket
+    | _        -&gt; `Socket
+  with Not_found -&gt; `Socket
 
 let dhcp =
   try match Sys.getenv "ADDR" with
-    | "dhcp"   -> `Dhcp
-    | "static" -> `Static
-  with Not_found -> `Dhcp
+    | "dhcp"   -&gt; `Dhcp
+    | "static" -&gt; `Static
+  with Not_found -&gt; `Dhcp
 
 let stack console =
   match net, dhcp with
-  | `Direct, `Dhcp   -> direct_stackv4_with_dhcp console tap0
-  | `Direct, `Static -> direct_stackv4_with_default_ipv4 console tap0
-  | `Socket, _       -> socket_stackv4 console [Ipaddr.V4.any]
+  | `Direct, `Dhcp   -&gt; direct_stackv4_with_dhcp console tap0
+  | `Direct, `Static -&gt; direct_stackv4_with_default_ipv4 console tap0
+  | `Socket, _       -&gt; socket_stackv4 console [Ipaddr.V4.any]
 
 let () =
   register "network" [
@@ -176,17 +177,55 @@ let () =
           </code>
           </pre>
         </section>
+        <section>
+          <em>another possibly ill advised live demo</em>
+        </section>
+        <section>
+        <p>Mirage lets us write us quickly iterate an application as a standard Unix executable and produce a unikernel from the same code</p>
+        </section>
       </section>
       <section>
-      <h1>Why unikernel?</h1>
-      security, scaling, server density 
-      </section>
-      <section>Why _learn about_ unikernels?
-      its fun. learn about networking by looking at code. its the future.
+        <section>
+        <h1>Why unikernel?</h1>
+        </section>
+        <section>
+          <h2>Security</h2>
+          <p class="fragment">Reduced attack surface</p>
+          <p class="fragment">Code you can read</p>
+          <p class="fragment">Nothing to exploit?</p>
+        </section>
+        <section>
+          <h2>Flexibility</h2>
+          <p class="fragment">Start unikernels in milliseconds - scaling</p>
+          <p class="fragment">Efficiency and density</p>
+          <p class="fragment">Support other devices</p>
+        </section>
       </section>
       <section>
-      <h1>Cool stuff</h1>
-      Jitsu, Irmin, that TODO app thingy
+        <section>
+          <h1>Why <em>learn about</em> unikernels?</h1>
+        </section>
+        <section>
+          <p>It's fun!</p>
+          <p><a href="https://github.com/mattgray/horseos">https://github.com/mattgray/horseos</a></p>
+        </section>
+        <section>
+            <p>Learn about how computers work!</p>
+            <p class="fragment"><a href="https://github.com/mirage/mirage-tcpip/blob/master/lib/ipv4.ml#L71">How to find what MAC address to send a packet to...</a>
+        </section>
+        <section>
+          <p>It's the future!</p>
+        </section>
+      </section>
+      <section>
+        <section>
+          <h1>Cool stuff</h1>
+        </section>
+        <section>
+          <h2>Jitsu</h2>
+          <p>Just-In-Time Summoning of Unikernels</p>
+          <p><a href="https://github.com/mirage/jitsu">https://github.com/mirage/jitsu</a></p>
+        </section>
       </section>
       <section>
       <h1>Learn more</h1>
