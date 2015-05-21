@@ -4,9 +4,9 @@
   <head>
     <meta charset="utf-8">
 
-    <title>Unikernels and MirageOS</title>
+    <title>Unikernels and Mirage OS</title>
 
-    <meta name="description" content="My talk about MirageOS and unikernels at Devs in the Ditch">
+    <meta name="description" content="My talk about Mirage OS and unikernels at Devs in the Ditch">
     <meta name="author" content="Matt Gray">
 
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -41,7 +41,7 @@
       <!-- Any section element inside of this container is displayed as a slide -->
       <div class="slides">
       <section>
-        <h2>MirageOS and Unikernels</h2>
+        <h2>Mirage OS and Unikernels</h2>
         <p>Matt Gray - <a href="http://twitter.com/portedegrange">@portedegrange</a></p>
       </section>
       <section>
@@ -49,7 +49,7 @@
           <h2>What is a unikernel?</h2>
         </section>
         <section>
-          <p>Consider a simple web site, serving static webpages over HTTP, running in a virtualised enviroment like AWS</p>
+          <p>Consider a simple web service, serving static webpages over HTTP, running in a virtualised enviroment like AWS</p>
           <p>What "machinery" is required to perform this task?</p>
         </section>
         <section>
@@ -68,13 +68,13 @@
             | hardware          |
              -------------------
           </pre>
-          <p class="fragment">It would be nice if we didn't have to  worry about securing and maintaining all this stuff!</p>
+          <p class="fragment">It would be nice if we didn't have to worry about securing and maintaining all this stuff!</p>
         </section>
         <section>
           <p>How about?</p>
            <pre>
            ---------------------
-          | web server + config | <span class="fragment">&lt; your web server <em>is</em> the kernel</span>
+          | web server + config | <span class="fragment">&lt; web server <em>is</em> the (uni)kernel</span>
            ---------------------
           | hypervisor          |
            ---------------------
@@ -83,12 +83,15 @@
           </pre>
         </section>
         <section>
-          <p>No unnecessary dependencies, services, just the things you need to serve your website!</p>
+          <p>No unnecessary dependencies, just the things you need to run your application!</p>
+        </section>
+        <section>
+          <p>Mirage OS is one approach to unikernels.
         </section>
       </section>
       <section>
         <section>
-          <h1>MirageOS</h1>
+          <h1>Mirage OS</h1>
         </section>
         <section>
           <p>Isn't writing your own kernel a bit, errr, <em>difficult</em>???
@@ -109,11 +112,84 @@
           </pre>
         </section>
         <section>
-          <em>possibly ill fated live demo</em>
+          <em>possibly ill advised live demo</em>
+        </section>
+        <section>
+          <p>What's going on?</p>
+        </section>
+        <section>
+          <p>We write Mirage applications in the OCaml programming language</p>
+        </section>
+        <section>
+          <p>Mirage can create Unix executables or unikernels that run on the Xen hypervisor</p>
+        </section>
+        <section>
+          <p>Mirage has libraries that implement a network stack, access to block storage, and other things that your OS would usually provide</p>
+        </section>
+        <section>
+          <p>The `mirage` command line tool configures your application code to use the correct libraries, based on the desired target.</p>
+        </section>
+        <section>
+          <pre>
+          <code>
+open Lwt
+
+module Main (C: V1_LWT.CONSOLE) (S: V1_LWT.STACKV4) = struct
+  let start c s =
+    S.listen_tcpv4 s ~port:8000 (fun flow -> do_something_with flow);
+
+    S.listen s
+end 
+          </code>
+          </pre>
+        </section>
+        <section>
+          <pre>
+          <code>
+open Mirage
+
+let main = foreign "Unikernel.Main" (console @-> stackv4 @-> job)
+
+let net =
+  try match Sys.getenv "NET" with
+    | "direct" -> `Direct
+    | "socket" -> `Socket
+    | _        -> `Socket
+  with Not_found -> `Socket
+
+let dhcp =
+  try match Sys.getenv "ADDR" with
+    | "dhcp"   -> `Dhcp
+    | "static" -> `Static
+  with Not_found -> `Dhcp
+
+let stack console =
+  match net, dhcp with
+  | `Direct, `Dhcp   -> direct_stackv4_with_dhcp console tap0
+  | `Direct, `Static -> direct_stackv4_with_default_ipv4 console tap0
+  | `Socket, _       -> socket_stackv4 console [Ipaddr.V4.any]
+
+let () =
+  register "network" [
+    main $ default_console $ stack default_console
+  ]
+          </code>
+          </pre>
         </section>
       </section>
       <section>
-        
+      <h1>Why unikernel?</h1>
+      security, scaling, server density 
+      </section>
+      <section>Why _learn about_ unikernels?
+      its fun. learn about networking by looking at code. its the future.
+      </section>
+      <section>
+      <h1>Cool stuff</h1>
+      Jitsu, Irmin, that TODO app thingy
+      </section>
+      <section>
+      <h1>Learn more</h1>
       </section>
       </div>
     </div>
